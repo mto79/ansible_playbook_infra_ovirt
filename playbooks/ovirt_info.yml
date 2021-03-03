@@ -11,24 +11,34 @@
     - name: "OVIRT_INFO: Obtain info"
       block:
         - name: "OVIRT_INFO - Include Vars"
-          ansible.builtin.include_vars: 
+          ansible.builtin.include_vars:
             file: ../vars/ovirt_password.yml
 
         - name: "OVIRT_INFO - Obtain SSO token with using username/password credentials."
           ovirt.ovirt.ovirt_auth:
             url: https://ovirt-engine.mto.local/ovirt-engine/api
             username: admin@internal
-            ca_file: ca.pem
+            ca_file: ../config/ca.crt
             password: "{{ ovirt_password }}"
 
         - name: "OVIRT_INFO : Obtain Datacenter info"
           ovirt.ovirt.ovirt_datacenter_info:
             pattern: name=Default*
-            register: result
-        
+            auth: "{{ ovirt_auth }}"
+          register: result
+
         - ansible.builtin.debug:
             msg: "{{ result.ovirt_datacenters }}"
-    
+
+        - name: "OVIRT_INFO : Obtain Cluster info"
+          ovirt.ovirt.ovirt_cluster_info:
+            pattern: name=Default*
+            auth: "{{ ovirt_auth }}"
+          register: result
+
+        - ansible.builtin.debug:
+            msg: "{{ result.ovirt_clusters }}"
+
       always:
         - name: "OVIRT_INFO: Always revoke the SSO token"
           ovirt.ovirt.ovirt_auth:
