@@ -1,0 +1,62 @@
+---
+# ansible_playbook_infra_ovirt/playbooks/ovirt_node1.yml
+# Author: MTO
+# Description: Ovirt-node1.yml file for ansible_playbook_infra_ovirt
+# Further setup after installining oVirt node 
+#
+- name: "HOST: ovirt_node1"
+  hosts: ovirt_node1
+ 
+  vars_files:
+    - ../vars/main.yml
+
+  pre_tasks:
+    - name: "ovirt-node1: MAIN - Laptop switch ignore (1)."
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        regexp: '^#HandleLidSwitch='
+        line: HandleLidSwitch=ignore
+    
+    - name: "ovirt-node1: MAIN - Laptop switch ignore (2)."
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        regexp: '^#HandleLidSwitchExternalPower='
+        line: HandleLidSwitchExternalPower=ignore
+
+    - name: "ovirt-node1: MAIN - Laptop switch ignore (3)."
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        regexp: '^#HandleLidSwitchDocked='
+        line: HandleLidSwitchDocked=ignore
+ 
+    - name: "ovirt-node1: MAIN - Restart service systemd-logind."
+      ansible.builtin.systemd:
+        name: systemd-logind 
+        state: restarted
+
+    - name: "ovirt-node1: MAIN - Create a NFS storage oVirt directory if it does not exist"
+      ansible.builtin.file:
+        path: /ovirt_storage
+        state: directory
+        mode: '0755'
+        owner: vdsm
+        group: kvm
+
+    - name: "ovirt-node1: MAIN - Set virt_use_nfs flag on and keep it persistent across reboots"
+      ansible.posix.seboolean:
+        name: virt_use_nfs
+        state: yes
+        persistent: yes
+    
+    - name: "ovirt-node1: MAIN - Set entries in host file"
+      ansible.builtin.blockinfile:
+        path: /etc/hosts
+        block: |
+          {{ item.ip }} {{ item.name }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+      loop:
+        - { name: ovirt-node1.mto.local, ip: 192.168.178.200 }
+        - { name: ovirt-engine.mto.local, ip: 192.168.178.201 }
+
+  roles:
+    - { role: mto79/system/nfs, tags: nfs, system } 

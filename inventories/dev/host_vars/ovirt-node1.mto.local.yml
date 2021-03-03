@@ -1,0 +1,2 @@
+---
+system_nfs_exports: [ "/ovirt_storage *(rw)" ]
