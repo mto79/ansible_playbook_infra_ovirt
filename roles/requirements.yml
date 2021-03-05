@@ -1,7 +1,7 @@
 ---
 # ansible_playbook_infra_ovirt/roles/requirements.yml
 # Author: MTO
-# Description: requirements.yml for host
+# Description: requirements.yml for ovirt
 #
 - src: https://github.com/mto79/ansible_role_system_nfs.git
   scm: git

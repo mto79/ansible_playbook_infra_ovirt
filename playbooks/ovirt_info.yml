@@ -1,6 +1,6 @@
 ---
 # ansible_playbook_infra_ovirt/playbooks/ovirt_info.yml
-# Author: MTO
+i# Author: MTO
 # Description: ovirt_info.yml file for ansible_playbook_infra_ovirt
 #
 - name: "OVIRT_INFO"
